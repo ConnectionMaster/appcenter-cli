@@ -57,7 +57,7 @@ export default class ReleaseBinaryCommand extends AppCommand {
   @hasArg
   public buildNumber: string;
 
-  @help("Distribution group name(s)")
+  @help("Comma-separated distribution group names")
   @shortName("g")
   @longName("group")
   @hasArg
@@ -69,13 +69,13 @@ export default class ReleaseBinaryCommand extends AppCommand {
   @hasArg
   public storeName: string;
 
-  @help("Release notes text")
+  @help("Release notes text (5000 characters max)")
   @shortName("r")
   @longName("release-notes")
   @hasArg
   public releaseNotes: string;
 
-  @help("Path to release notes file")
+  @help("Path to release notes file (markdown supported, 5000 characters max)")
   @shortName("R")
   @longName("release-notes-file")
   @hasArg
@@ -562,16 +562,12 @@ export default class ReleaseBinaryCommand extends AppCommand {
       const statusCode = response.statusCode;
       if (statusCode >= 400) {
         debug(`Got error response: ${inspect(response)}`);
-        throw statusCode;
+        throw result;
       }
       return result;
     } catch (error) {
-      if (error === 400) {
-        throw failure(ErrorCodes.Exception, "failed to set the release notes");
-      } else {
-        debug(`Failed to distribute the release - ${inspect(error)}`);
-        throw failure(ErrorCodes.Exception, `failed to set release notes for release ${releaseId}`);
-      }
+      debug(`Failed to set the release notes - ${inspect(error)}`);
+      throw failure(ErrorCodes.Exception, error.message);
     }
   }
 
